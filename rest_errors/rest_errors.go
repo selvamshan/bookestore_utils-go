@@ -16,12 +16,12 @@ func NewError(msg string) error {
 	return errors.New(msg)
 }
 
-func NewRestErr(msg string, status int, err string, causes  []interface{}){
+func NewRestError(msg string, status int, err string, causes []interface{}) *RestErr{
 	return &RestErr{
 		Message: msg, 
 		Status: status, 
 		Error: err, 
-		Cause: causes		
+		Causes: causes,		
 	}
 }
 

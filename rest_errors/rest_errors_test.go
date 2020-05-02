@@ -38,3 +38,11 @@ func TestNewInternalServerError(t *testing.T)  {
 	assert.Equal(t, 1, len(err.Causes))
 	assert.EqualValues(t, "database error", err.Causes[0])
 }
+
+func TestNewRestError(t *testing.T) {
+	err := NewRestError("impleted me", http.StatusNotImplemented, "not_implemented", nil)
+	assert.NotNil(t, err)
+	assert.Nil(t, nil, err.Causes)
+	assert.EqualValues(t, "impleted me", err.Message)
+	assert.EqualValues(t, "not_implemented", err.Error)
+}
