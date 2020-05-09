@@ -1,8 +1,10 @@
 package rest_errors
 
 import (
-	"net/http"	
+	"fmt"
 	"errors"
+	"encoding/json"
+	"net/http"		
 )
 
 
@@ -10,7 +12,7 @@ type RestErr interface {
 	Message() string 
 	Status() int
 	Error() string
-	Causes() []interface {}	
+	Causes() []interface{}	
 }
 
 type restErr struct {
@@ -22,19 +24,19 @@ type restErr struct {
 
 
 
-func (e *restErr) Error() string {
-	return fmt.Sprintf("messages: %s - status: %d - err: %s - causes: [ %v ]",
+func (e restErr) Error() string {
+	return fmt.Sprintf("message: %s - status: %d - error: %s - causes: %v",
 			e.message, e.status, e.err, e.causes)
 }
 
-func (e *restErr) Message() string {
+func (e restErr) Message() string {
 	return e.message
 }
 
-func (e *restErr) Status() int {
+func (e restErr) Status() int {
 	return e.status
 }
-func (e *restErr) Causes() []interface{} {
+func (e restErr) Causes() []interface{} {
 	return e.causes
 }
 
@@ -46,6 +48,15 @@ func NewRestError(msg string, status int, err string, causes []interface{}) Rest
 		err: err, 
 		causes: causes,		
 	}
+}
+
+
+func NewRestErrorFromBytes(bytes []byte) (RestErr, error) {
+	var apiErr restErr
+	if err := json.Unmarshal(bytes, &apiErr); err != nil {
+		return nil, errors.New("invalid json")
+	}
+	return apiErr, nil
 }
 
 func NewBadRequestError(message string) RestErr {
@@ -80,7 +91,7 @@ func NewInternalServerError(message string, err_  error) RestErr {
 		status: http.StatusInternalServerError,
 		err: "internal_server_error",		
 	}
-	if err != nil {
+	if err_ != nil {
 		result.causes = append(result.causes, err_.Error())
 	}
 	return result
