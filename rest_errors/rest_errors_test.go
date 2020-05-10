@@ -1,10 +1,11 @@
 package rest_errors
 
 import (
+	"fmt"
 	"errors"
 	"net/http"
 	"testing"
-
+	"encoding/json"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -44,4 +45,21 @@ func TestNewRestError(t *testing.T) {
 	assert.Nil(t, nil, err.Causes())
 	assert.EqualValues(t, "impleted me", err.Message())
 	assert.EqualValues(t, "message: impleted me - status: 501 - error: not_implemented - causes: []", err.Error())
+}
+
+func TestNewErrorFromBytes(t *testing.T){
+	err := &restErr{
+		ErrMessage:"no user found with given credintials",
+		ErrStatus:404,
+		ErrError:"not_found",
+	}
+	bytes, _ := json.Marshal(err)
+	apiErr, jsonErr :=  NewRestErrorFromBytes(bytes)
+    fmt.Println(apiErr)
+	fmt.Println(jsonErr)
+	assert.NotNil(t,apiErr)
+	assert.Nil(t, jsonErr)
+	assert.EqualValues(t, http.StatusNotFound, apiErr.Status())
+	assert.EqualValues(t, "no user found with given credintials", apiErr.Message())
+	assert.EqualValues(t, "message: no user found with given credintials - status: 404 - error: not_found - causes: []", apiErr.Error())
 }
